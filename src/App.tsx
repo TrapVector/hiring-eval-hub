@@ -3,18 +3,19 @@ import { AuthProvider } from './auth/AuthContext'
 import { isConfigComplete } from './config/isConfigComplete'
 import { loadConfig } from './store/configStore'
 import type { AppConfig } from './store/db'
-import { AuthControl } from './ui/components/AuthControl'
+import { StoreProvider } from './store/StoreContext'
+import { Shell } from './ui/Shell'
 import { SetupWizard } from './ui/settings/SetupWizard'
 
 function App() {
   return (
     <AuthProvider>
-      <AppShell />
+      <ConfigGate />
     </AuthProvider>
   )
 }
 
-function AppShell() {
+function ConfigGate() {
   const [config, setConfig] = useState<AppConfig | null | 'loading'>('loading')
 
   useEffect(() => {
@@ -39,11 +40,9 @@ function AppShell() {
   }
 
   return (
-    <main style={{ padding: '2rem', maxWidth: 640, margin: '0 auto' }}>
-      <h1>Arcade Hiring Review</h1>
-      <p>Configured. Dashboard lands in a later milestone.</p>
-      <AuthControl defaultClientId={config.oauthClientId} />
-    </main>
+    <StoreProvider config={config}>
+      <Shell config={config} onConfigChanged={() => void loadConfig().then(setConfig)} />
+    </StoreProvider>
   )
 }
 

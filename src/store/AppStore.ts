@@ -2,7 +2,16 @@ import type { QueuedEdit } from '../data/types'
 import type { SheetsAuth } from '../sheets/types'
 import type { AppConfig } from './db'
 import { flushQueue } from './flush'
-import { loadSnapshot, saveCachedFields, saveCachedPositions, saveCachedStages, saveSnapshot } from './configStore'
+import {
+  loadCachedFields,
+  loadCachedPositions,
+  loadCachedStages,
+  loadSnapshot,
+  saveCachedFields,
+  saveCachedPositions,
+  saveCachedStages,
+  saveSnapshot,
+} from './configStore'
 import { enqueueEdit, getQueuedEdits } from './queueStore'
 import { pollOnce } from './syncEngine'
 import { initialSyncState, type SyncState } from './types'
@@ -29,10 +38,16 @@ export class AppStore {
     return () => this.listeners.delete(listener)
   }
 
-  /** Loads the last-read snapshot + queue count from IndexedDB so the app opens instantly (§7). */
+  /** Loads the last-read snapshot + cached config tables + queue count from IndexedDB so the app opens instantly (§7). */
   async hydrate(): Promise<void> {
-    const [applicants, queue] = await Promise.all([loadSnapshot(), getQueuedEdits()])
-    this.setState({ applicants, pendingCount: queue.length })
+    const [applicants, stages, positions, fields, queue] = await Promise.all([
+      loadSnapshot(),
+      loadCachedStages(),
+      loadCachedPositions(),
+      loadCachedFields(),
+      getQueuedEdits(),
+    ])
+    this.setState({ applicants, stages, positions, fields, pendingCount: queue.length })
   }
 
   async editStage(email: string, stage: string, config: AppConfig, auth: SheetsAuth): Promise<void> {
@@ -76,6 +91,10 @@ export class AppStore {
   async flush(config: AppConfig, auth: SheetsAuth): Promise<void> {
     try {
       await flushQueue(config, auth)
+    } catch {
+      // A failure before any row could be processed (offline, not yet
+      // authenticated, network error) leaves the whole queue as-is; the
+      // next flush/online event retries it (§8.4.5).
     } finally {
       const queue = await getQueuedEdits()
       this.setState({ pendingCount: queue.length })
