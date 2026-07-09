@@ -1,0 +1,21 @@
+.control {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 320px;
+}
+
+.label {
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.status {
+  color: var(--text-h);
+}
+
+.error {
+  color: var(--danger);
+  font-size: 0.85rem;
+  margin: 0;
+}
