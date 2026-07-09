@@ -2,9 +2,14 @@ import { useState } from 'react'
 import { useAuth } from '../../auth/AuthContext'
 import styles from './AuthControl.module.css'
 
-export function AuthControl() {
+interface AuthControlProps {
+  /** Pre-fills the Client ID field from stored config, so returning users don't retype it. */
+  defaultClientId?: string
+}
+
+export function AuthControl({ defaultClientId = '' }: AuthControlProps) {
   const { status, error, connect, reconnect } = useAuth()
-  const [clientId, setClientId] = useState('')
+  const [clientId, setClientId] = useState(defaultClientId)
   const [busy, setBusy] = useState(false)
 
   async function handleConnect() {

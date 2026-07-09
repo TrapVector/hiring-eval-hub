@@ -21,6 +21,15 @@ export async function resolveApplicationsTabName(
   return first
 }
 
+export async function readApplicationsHeader(
+  spreadsheetId: string,
+  tabName: string,
+  auth: SheetsAuth,
+): Promise<string[]> {
+  const [header = []] = await getValues(spreadsheetId, `${tabName}!1:1`, auth)
+  return header
+}
+
 export async function readApplications(
   spreadsheetId: string,
   tabName: string,

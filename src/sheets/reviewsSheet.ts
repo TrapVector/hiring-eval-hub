@@ -104,6 +104,31 @@ export async function appendReviewsRow(
   await appendValues(spreadsheetId, tableRange(REVIEWS_TAB, header), [row], auth)
 }
 
+/** Overwrites the whole Stages table (header + all rows) — used by the setup wizard/Settings. */
+export async function writeStages(spreadsheetId: string, stages: StageRow[], auth: SheetsAuth): Promise<void> {
+  const values = [STAGES_HEADER, ...stages.map((s) => [s.stage, s.isActionQueue ? 'TRUE' : 'FALSE'])]
+  await updateValues(spreadsheetId, wholeTableRange(STAGES_TAB, STAGES_HEADER, values.length), values, auth)
+}
+
+/** Overwrites the whole Positions table (header + all rows) — used by the setup wizard/Settings. */
+export async function writePositions(spreadsheetId: string, positions: PositionRow[], auth: SheetsAuth): Promise<void> {
+  const values = [POSITIONS_HEADER, ...positions.map((p) => [p.position])]
+  await updateValues(spreadsheetId, wholeTableRange(POSITIONS_TAB, POSITIONS_HEADER, values.length), values, auth)
+}
+
+/** Overwrites the whole Fields table (header + all rows) — used by the setup wizard/Settings. */
+export async function writeFields(spreadsheetId: string, fields: FieldRow[], auth: SheetsAuth): Promise<void> {
+  const values = [
+    FIELDS_HEADER,
+    ...fields.map((f) => [f.column, f.role, f.show ? 'TRUE' : 'FALSE', f.order === null ? '' : String(f.order)]),
+  ]
+  await updateValues(spreadsheetId, wholeTableRange(FIELDS_TAB, FIELDS_HEADER, values.length), values, auth)
+}
+
+function wholeTableRange(tab: string, header: string[], rowCount: number): string {
+  return `${tab}!A1:${columnLetter(header.length - 1)}${rowCount}`
+}
+
 function rowRange(tab: string, header: string[], sheetRow: number): string {
   return `${tab}!A${sheetRow}:${columnLetter(header.length - 1)}${sheetRow}`
 }
