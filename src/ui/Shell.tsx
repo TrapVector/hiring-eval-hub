@@ -6,6 +6,7 @@ import { ApplicantList } from './applicants/ApplicantList'
 import { AuthControl } from './components/AuthControl'
 import { StatusBar } from './components/StatusBar'
 import { Dashboard } from './dashboard/Dashboard'
+import { PrintPacket } from './print/PrintPacket'
 import { SetupWizard } from './settings/SetupWizard'
 import styles from './Shell.module.css'
 
@@ -13,6 +14,7 @@ export type View =
   | { name: 'dashboard' }
   | { name: 'queue'; stage: string | null }
   | { name: 'applicant'; email: string; queueEmails: string[]; back: View }
+  | { name: 'print'; queueEmails: string[]; back: View }
   | { name: 'settings' }
 
 interface ShellProps {
@@ -25,6 +27,12 @@ export function Shell({ config, onConfigChanged }: ShellProps) {
   const [view, setView] = useState<View>({ name: 'dashboard' })
 
   const applicant = view.name === 'applicant' ? applicants.find((a) => a.email === view.email) : undefined
+
+  // Print packets are a full takeover: no app header/status-bar/auth-row, since none of
+  // that chrome belongs on a printed page or its print preview.
+  if (view.name === 'print') {
+    return <PrintPacket queueEmails={view.queueEmails} onBack={() => setView(view.back)} />
+  }
 
   return (
     <div className={styles.shell}>
@@ -50,6 +58,7 @@ export function Shell({ config, onConfigChanged }: ShellProps) {
             initialStage={view.stage}
             onBack={() => setView({ name: 'dashboard' })}
             onOpenApplicant={(email, queueEmails) => setView({ name: 'applicant', email, queueEmails, back: view })}
+            onPrintQueue={(queueEmails) => setView({ name: 'print', queueEmails, back: view })}
           />
         )}
 

@@ -1,0 +1,105 @@
+/* Printer-friendly: hard-coded black-on-white, not the app's themed CSS
+   variables, so output doesn't depend on the browser's light/dark mode. */
+
+.toolbar {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: #f4f4f4;
+  border-bottom: 1px solid #ccc;
+}
+
+.packets {
+  background: #fff;
+  color: #000;
+}
+
+.page {
+  padding: 2cm;
+  max-width: 21cm;
+  margin: 0 auto;
+  break-after: page;
+  page-break-after: always;
+}
+
+.page:last-child {
+  break-after: auto;
+  page-break-after: auto;
+}
+
+.name {
+  font-size: 1.8rem;
+  margin: 0 0 0.15rem;
+}
+
+.preferredName {
+  font-size: 1.1rem;
+  font-weight: normal;
+  color: #333;
+  margin: 0 0 1.25rem;
+}
+
+.keyInfo {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem 1.5rem;
+  border: 1px solid #000;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+}
+
+.keyInfoItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.keyInfoLabel {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #333;
+}
+
+.note {
+  margin-bottom: 1.5rem;
+}
+
+.note h2,
+.answers h2 {
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid #000;
+  padding-bottom: 0.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.note p {
+  white-space: pre-wrap;
+}
+
+.answer {
+  margin-bottom: 1rem;
+}
+
+.answer h3 {
+  font-size: 1rem;
+  margin: 0 0 0.25rem;
+}
+
+.answer p {
+  margin: 0;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+@media print {
+  .noPrint {
+    display: none;
+  }
+
+  .page {
+    padding: 0;
+  }
+}

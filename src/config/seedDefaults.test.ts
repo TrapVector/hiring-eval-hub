@@ -29,8 +29,8 @@ describe('guessFields', () => {
   it('leaves unmatched columns with no role, visible, in header order', () => {
     const fields = guessFields(['Timestamp', 'Why do you want this job?'])
     expect(fields).toEqual([
-      { column: 'Timestamp', role: '', show: true, order: 0 },
-      { column: 'Why do you want this job?', role: '', show: true, order: 1 },
+      { column: 'Timestamp', role: '', show: true, order: 0, keyInfo: false },
+      { column: 'Why do you want this job?', role: '', show: true, order: 1, keyInfo: false },
     ])
   })
 })

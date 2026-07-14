@@ -20,6 +20,7 @@ const FIELD_ROLE_OPTIONS: { value: FieldRole; label: string }[] = [
   { value: '', label: 'Short field' },
   { value: 'key', label: 'Email (key)' },
   { value: 'name', label: 'Name' },
+  { value: 'preferredName', label: 'Preferred name' },
   { value: 'long', label: 'Long-form answer' },
 ]
 
@@ -71,8 +72,13 @@ export function SetupWizard({ initialConfig, onComplete }: SetupWizardProps) {
   async function handleSave() {
     const keyCount = fields.filter((f) => f.role === 'key').length
     const nameCount = fields.filter((f) => f.role === 'name').length
+    const preferredNameCount = fields.filter((f) => f.role === 'preferredName').length
     if (keyCount !== 1 || nameCount !== 1) {
       setError('Exactly one field must be marked Email (key) and one Name.')
+      return
+    }
+    if (preferredNameCount > 1) {
+      setError('At most one field may be marked Preferred name.')
       return
     }
     setBusy(true)
@@ -171,6 +177,7 @@ function FieldsEditor({ fields, onChange }: { fields: FieldRow[]; onChange: (fie
           <th>Role</th>
           <th>Show</th>
           <th>Order</th>
+          <th>Key info</th>
         </tr>
       </thead>
       <tbody>
@@ -194,6 +201,13 @@ function FieldsEditor({ fields, onChange }: { fields: FieldRow[]; onChange: (fie
                 type="number"
                 value={field.order ?? ''}
                 onChange={(e) => update(i, { order: e.target.value === '' ? null : Number(e.target.value) })}
+              />
+            </td>
+            <td>
+              <input
+                type="checkbox"
+                checked={field.keyInfo}
+                onChange={(e) => update(i, { keyInfo: e.target.checked })}
               />
             </td>
           </tr>

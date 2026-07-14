@@ -33,6 +33,6 @@ export function guessFields(header: string[]): FieldRow[] {
       role = 'name'
       nameAssigned = true
     }
-    return { column: trimmed, role, show: true, order: i }
+    return { column: trimmed, role, show: true, order: i, keyInfo: false }
   })
 }

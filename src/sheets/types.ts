@@ -24,13 +24,15 @@ export interface PositionRow {
   position: string
 }
 
-export type FieldRole = 'key' | 'name' | 'long' | ''
+export type FieldRole = 'key' | 'name' | 'preferredName' | 'long' | ''
 
 export interface FieldRow {
   column: string
   role: FieldRole
   show: boolean
   order: number | null
+  /** Included in the printed interview packet's key-info block, independent of `show`/`role`. */
+  keyInfo: boolean
 }
 
 export interface ApplicationRow {

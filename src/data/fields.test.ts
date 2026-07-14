@@ -3,7 +3,7 @@ import { resolveFields } from './fields'
 import type { FieldRow } from '../sheets/types'
 
 function field(overrides: Partial<FieldRow>): FieldRow {
-  return { column: 'Column', role: '', show: true, order: null, ...overrides }
+  return { column: 'Column', role: '', show: true, order: null, keyInfo: false, ...overrides }
 }
 
 describe('resolveFields', () => {
@@ -41,5 +41,23 @@ describe('resolveFields', () => {
     const resolved = resolveFields([field({ column: 'Other' })])
     expect(resolved.keyColumn).toBeNull()
     expect(resolved.nameColumn).toBeNull()
+  })
+
+  it('finds the preferred-name column', () => {
+    const fields = [field({ column: 'Full Name', role: 'name' }), field({ column: 'Goes by', role: 'preferredName' })]
+    expect(resolveFields(fields).preferredNameColumn).toBe('Goes by')
+  })
+
+  it('returns null preferred-name when unset', () => {
+    expect(resolveFields([field({ column: 'Other' })]).preferredNameColumn).toBeNull()
+  })
+
+  it('collects key-info columns sorted by order, independent of show/role', () => {
+    const fields = [
+      field({ column: 'Phone', keyInfo: true, order: 2, show: false }),
+      field({ column: 'Availability', keyInfo: true, order: 1 }),
+      field({ column: 'Why us?', role: 'long', keyInfo: false }),
+    ]
+    expect(resolveFields(fields).keyInfoColumns.map((f) => f.column)).toEqual(['Availability', 'Phone'])
   })
 })

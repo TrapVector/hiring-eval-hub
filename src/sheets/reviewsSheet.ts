@@ -10,7 +10,7 @@ export const FIELDS_TAB = 'Fields'
 export const REVIEWS_HEADER = ['email', 'stage', 'offeredPosition', 'note', 'updatedAt']
 export const STAGES_HEADER = ['stage', 'isActionQueue']
 export const POSITIONS_HEADER = ['position']
-export const FIELDS_HEADER = ['column', 'role', 'show', 'order']
+export const FIELDS_HEADER = ['column', 'role', 'show', 'order', 'keyInfo']
 
 export interface ReviewsRecord extends ReviewsRow {
   /** 1-based row number in the sheet (including the header row), for targeted updates. */
@@ -78,6 +78,7 @@ export async function readFields(spreadsheetId: string, auth: SheetsAuth): Promi
     role: parseFieldRole(row.role ?? ''),
     show: parseBoolean(row.show ?? ''),
     order: parseOrder(row.order ?? ''),
+    keyInfo: parseBoolean(row.keyInfo ?? ''),
   }))
 }
 
@@ -120,7 +121,13 @@ export async function writePositions(spreadsheetId: string, positions: PositionR
 export async function writeFields(spreadsheetId: string, fields: FieldRow[], auth: SheetsAuth): Promise<void> {
   const values = [
     FIELDS_HEADER,
-    ...fields.map((f) => [f.column, f.role, f.show ? 'TRUE' : 'FALSE', f.order === null ? '' : String(f.order)]),
+    ...fields.map((f) => [
+      f.column,
+      f.role,
+      f.show ? 'TRUE' : 'FALSE',
+      f.order === null ? '' : String(f.order),
+      f.keyInfo ? 'TRUE' : 'FALSE',
+    ]),
   ]
   await updateValues(spreadsheetId, wholeTableRange(FIELDS_TAB, FIELDS_HEADER, values.length), values, auth)
 }
@@ -149,6 +156,6 @@ function parseOrder(value: string): number | null {
 }
 
 function parseFieldRole(value: string): FieldRole {
-  const v = value.trim().toLowerCase()
-  return v === 'key' || v === 'name' || v === 'long' ? v : ''
+  const v = value.trim()
+  return v === 'key' || v === 'name' || v === 'preferredName' || v === 'long' ? v : ''
 }

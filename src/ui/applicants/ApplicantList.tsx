@@ -10,9 +10,10 @@ interface ApplicantListProps {
   initialStage: string | null
   onBack: () => void
   onOpenApplicant: (email: string, queueEmails: string[]) => void
+  onPrintQueue: (queueEmails: string[]) => void
 }
 
-export function ApplicantList({ initialStage, onBack, onOpenApplicant }: ApplicantListProps) {
+export function ApplicantList({ initialStage, onBack, onOpenApplicant, onPrintQueue }: ApplicantListProps) {
   const { applicants, stages, fields } = useStore()
   const { nameColumn } = resolveFields(fields)
   const [stageFilter, setStageFilter] = useState<string | null>(initialStage)
@@ -66,6 +67,10 @@ export function ApplicantList({ initialStage, onBack, onOpenApplicant }: Applica
           </select>
         </label>
       </div>
+
+      <button type="button" onClick={() => onPrintQueue(queueEmails)} disabled={sorted.length === 0}>
+        Print packets
+      </button>
 
       {sorted.length === 0 ? (
         <p>No applicants in this view.</p>
