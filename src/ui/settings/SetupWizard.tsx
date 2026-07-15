@@ -1,12 +1,15 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useAuth } from '../../auth/AuthContext'
+import { isConfigComplete } from '../../config/isConfigComplete'
 import { defaultStages, guessFields } from '../../config/seedDefaults'
+import { decodeSetupLink } from '../../config/setupLink'
 import { writeConfigTables } from '../../config/writeConfigTables'
 import { readApplicationsHeader, resolveApplicationsTabName } from '../../sheets/applicationsSheet'
 import { ensureReviewsWorkbook, readFields, readPositions, readStages } from '../../sheets/reviewsSheet'
 import type { FieldRole, FieldRow, PositionRow, StageRow } from '../../sheets/types'
 import { saveConfig } from '../../store/configStore'
 import type { AppConfig } from '../../store/db'
+import { DeviceLinkQrCode } from './DeviceLinkQrCode'
 import styles from './SetupWizard.module.css'
 
 interface SetupWizardProps {
@@ -30,10 +33,28 @@ export function SetupWizard({ initialConfig, onComplete }: SetupWizardProps) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const [applicationsSheetId, setApplicationsSheetId] = useState(initialConfig?.applicationsSheetId ?? '')
-  const [applicationsTabName, setApplicationsTabName] = useState(initialConfig?.applicationsTabName ?? '')
-  const [reviewsSheetId, setReviewsSheetId] = useState(initialConfig?.reviewsSheetId ?? '')
-  const [oauthClientId, setOauthClientId] = useState(initialConfig?.oauthClientId ?? '')
+  // A true first run (no saved config yet) may arrive via a QR/link from another
+  // device with Step 1 pre-filled; an existing config is never overwritten by one.
+  const [linkPrefill] = useState(() => (initialConfig ? null : decodeSetupLink(window.location.search)))
+
+  useEffect(() => {
+    if (linkPrefill) {
+      window.history.replaceState(null, '', window.location.pathname)
+    }
+    // Intentionally run once on mount only.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const [applicationsSheetId, setApplicationsSheetId] = useState(
+    linkPrefill?.applicationsSheetId ?? initialConfig?.applicationsSheetId ?? '',
+  )
+  const [applicationsTabName, setApplicationsTabName] = useState(
+    linkPrefill?.applicationsTabName ?? initialConfig?.applicationsTabName ?? '',
+  )
+  const [reviewsSheetId, setReviewsSheetId] = useState(
+    linkPrefill?.reviewsSheetId ?? initialConfig?.reviewsSheetId ?? '',
+  )
+  const [oauthClientId, setOauthClientId] = useState(linkPrefill?.oauthClientId ?? initialConfig?.oauthClientId ?? '')
 
   const [fields, setFields] = useState<FieldRow[]>([])
   const [stages, setStages] = useState<StageRow[]>([])
@@ -133,6 +154,8 @@ export function SetupWizard({ initialConfig, onComplete }: SetupWizardProps) {
           {busy ? 'Connecting…' : 'Connect & continue'}
         </button>
         {error && <p className={styles.error}>{error}</p>}
+
+        {initialConfig && isConfigComplete(initialConfig) && <DeviceLinkQrCode config={initialConfig} />}
       </div>
     )
   }
